@@ -50,9 +50,14 @@ final class PasswordGeneratorService
 
         $pool = implode('', $sets);
         if (($options['exclude_ambiguous'] ?? '') === '1') {
-            $pool = str_replace(str_split(self::AMBIGUOUS), '', $pool);
+            $sets = array_map(static fn (string $set): string => str_replace(str_split(self::AMBIGUOUS), '', $set), $sets);
+            $sets = array_values(array_filter($sets, static fn (string $set): bool => $set !== ''));
+            $pool = str_replace(str_split(self::AMBIGUOUS), '', implode('', $sets));
         }
         $pool = implode('', array_values(array_unique(str_split($pool))));
+        if ($pool === '') {
+            throw new \InvalidArgumentException('Selected generator profile has no available characters.');
+        }
 
         $password = '';
         foreach ($sets as $set) {

@@ -14,9 +14,9 @@ final readonly class UserRepository
     public function findForLogin(string $identifier): ?array
     {
         $stmt = $this->db->pdo()->prepare(
-            'SELECT * FROM users WHERE deleted_at IS NULL AND (lower(email::text) = lower(:identifier) OR lower(username::text) = lower(:identifier)) LIMIT 1'
+            'SELECT * FROM users WHERE deleted_at IS NULL AND (lower(email::text) = lower(:identifier_email) OR lower(username::text) = lower(:identifier_username)) LIMIT 1'
         );
-        $stmt->execute(['identifier' => $identifier]);
+        $stmt->execute(['identifier_email' => $identifier, 'identifier_username' => $identifier]);
         $row = $stmt->fetch();
         return $row === false ? null : $row;
     }

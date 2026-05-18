@@ -20,12 +20,16 @@ final readonly class VaultRepository
             LEFT JOIN folder_shares fs ON fs.folder_id = ve.folder_id AND fs.revoked_at IS NULL
             WHERE ve.deleted_at IS NULL
               AND ve.status = 'active'
-              AND (ve.owner_user_id = :user_id OR ves.grantee_user_id = :user_id OR fs.grantee_user_id = :user_id)
+              AND (ve.owner_user_id = :owner_user_id OR ves.grantee_user_id = :entry_grantee_user_id OR fs.grantee_user_id = :folder_grantee_user_id)
             ORDER BY ve.favorite DESC, ve.updated_at DESC
         SQL;
 
         $stmt = $this->db->pdo()->prepare($sql);
-        $stmt->execute(['user_id' => $userId]);
+        $stmt->execute([
+            'owner_user_id' => $userId,
+            'entry_grantee_user_id' => $userId,
+            'folder_grantee_user_id' => $userId,
+        ]);
         return $stmt->fetchAll();
     }
 
@@ -63,13 +67,13 @@ final readonly class VaultRepository
         $sql = <<<'SQL'
             SELECT ve.*
             FROM vault_entries ve
-            LEFT JOIN vault_entry_shares ves ON ves.vault_entry_id = ve.id AND ves.revoked_at IS NULL AND ves.grantee_user_id = :user_id
-            LEFT JOIN folder_shares fs ON fs.folder_id = ve.folder_id AND fs.revoked_at IS NULL AND fs.grantee_user_id = :user_id
+            LEFT JOIN vault_entry_shares ves ON ves.vault_entry_id = ve.id AND ves.revoked_at IS NULL AND ves.grantee_user_id = :entry_grantee_user_id
+            LEFT JOIN folder_shares fs ON fs.folder_id = ve.folder_id AND fs.revoked_at IS NULL AND fs.grantee_user_id = :folder_grantee_user_id
             WHERE ve.id = :entry_id
               AND ve.deleted_at IS NULL
               AND ve.status = 'active'
               AND (
-                    ve.owner_user_id = :user_id
+                    ve.owner_user_id = :owner_user_id
                  OR ves.permission IN ('read', 'write', 'share', 'owner')
                  OR fs.permission IN ('read', 'write', 'share', 'owner')
               )
@@ -77,7 +81,12 @@ final readonly class VaultRepository
         SQL;
 
         $stmt = $this->db->pdo()->prepare($sql);
-        $stmt->execute(['entry_id' => $entryId, 'user_id' => $userId]);
+        $stmt->execute([
+            'entry_id' => $entryId,
+            'owner_user_id' => $userId,
+            'entry_grantee_user_id' => $userId,
+            'folder_grantee_user_id' => $userId,
+        ]);
         $row = $stmt->fetch();
         return $row === false ? null : $row;
     }

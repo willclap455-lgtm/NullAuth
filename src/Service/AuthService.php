@@ -31,7 +31,9 @@ final readonly class AuthService
             return $genericFailure;
         }
 
-        $hash = is_array($user) ? (string) $user['password_hash'] : password_hash(random_bytes(32), PASSWORD_ARGON2ID);
+        $hash = is_array($user)
+            ? (string) $user['password_hash']
+            : password_hash($this->peppered(base64_encode(random_bytes(32))), PASSWORD_ARGON2ID, config('argon2id'));
         $candidate = $this->peppered($password);
         $validPassword = password_verify($candidate, $hash);
 
@@ -111,8 +113,12 @@ final readonly class AuthService
         $envelope = is_string($totp['secret_envelope'])
             ? $totp['secret_envelope']
             : json_encode($totp['secret_envelope'], JSON_THROW_ON_ERROR);
-        $secret = $this->crypto->decryptString($envelope, 'mfa_totp:' . $userId);
-        return $this->totp->verify($secret, $code);
+        try {
+            $secret = $this->crypto->decryptString($envelope, 'mfa_totp:' . $userId);
+            return $this->totp->verify($secret, $code);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }
 

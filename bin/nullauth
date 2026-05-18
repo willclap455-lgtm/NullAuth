@@ -3,6 +3,11 @@
 
 declare(strict_types=1);
 
+use NullAuth\Repository\Database;
+use NullAuth\Repository\UserRepository;
+use NullAuth\Support\Config;
+use NullAuth\Support\Env;
+
 $autoload = dirname(__DIR__) . '/vendor/autoload.php';
 if (is_file($autoload)) {
     require $autoload;
@@ -20,11 +25,6 @@ if (is_file($autoload)) {
         }
     });
 }
-
-use NullAuth\Repository\Database;
-use NullAuth\Repository\UserRepository;
-use NullAuth\Support\Config;
-use NullAuth\Support\Env;
 
 Env::load(base_path('.env'));
 Config::load(require base_path('config/app.php'));
