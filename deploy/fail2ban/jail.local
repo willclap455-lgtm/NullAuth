@@ -1,0 +1,8 @@
+[nullauth]
+enabled = true
+port = http,https
+filter = nullauth
+logpath = /var/log/nginx/nullauth.access.log
+maxretry = 8
+findtime = 900
+bantime = 3600

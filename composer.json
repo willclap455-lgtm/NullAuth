@@ -1,0 +1,34 @@
+{
+  "name": "nullauth/nullauth",
+  "description": "Self-hosted enterprise password management application for PHP 8.3 and PostgreSQL.",
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": "^8.3",
+    "ext-ctype": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "ext-openssl": "*",
+    "ext-pdo": "*",
+    "ext-pdo_pgsql": "*",
+    "ext-sodium": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "NullAuth\\": "src/"
+    },
+    "files": [
+      "src/Support/helpers.php"
+    ]
+  },
+  "scripts": {
+    "check": [
+      "@php -l public/index.php",
+      "@php -l bin/nullauth"
+    ]
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {}
+  }
+}
