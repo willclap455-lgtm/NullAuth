@@ -1,0 +1,43 @@
+:root {
+  --na-blue: #0b5ed7;
+  --na-blue-dark: #063f91;
+  --na-surface: #f5f8fc;
+  --na-border: #dce7f5;
+}
+
+.na-app {
+  background: var(--na-surface);
+  min-height: 100vh;
+}
+
+.na-topbar {
+  background: linear-gradient(90deg, var(--na-blue-dark), var(--na-blue));
+  box-shadow: 0 0.35rem 1rem rgba(6, 63, 145, 0.18);
+}
+
+.na-sidebar {
+  min-height: calc(100vh - 58px);
+  background: #ffffff;
+  border-right: 1px solid var(--na-border);
+}
+
+.na-card {
+  border: 1px solid var(--na-border);
+  box-shadow: 0 0.65rem 1.75rem rgba(16, 76, 145, 0.08);
+}
+
+.na-toast {
+  color: #ffffff;
+}
+
+code {
+  color: #0b5ed7;
+}
+
+@media (max-width: 991.98px) {
+  .na-sidebar {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--na-border);
+  }
+}

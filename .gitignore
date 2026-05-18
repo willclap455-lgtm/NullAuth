@@ -1,0 +1,9 @@
+/.env
+/vendor/
+/var/cache/
+/var/log/
+/var/sessions/
+/var/uploads/
+*.log
+*.sql.gz
+*.key

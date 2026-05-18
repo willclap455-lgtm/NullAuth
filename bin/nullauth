@@ -1,0 +1,112 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use NullAuth\Repository\Database;
+use NullAuth\Repository\UserRepository;
+use NullAuth\Support\Config;
+use NullAuth\Support\Env;
+
+$autoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (is_file($autoload)) {
+    require $autoload;
+} else {
+    require dirname(__DIR__) . '/src/Support/helpers.php';
+    spl_autoload_register(static function (string $class): void {
+        $prefix = 'NullAuth\\';
+        if (!str_starts_with($class, $prefix)) {
+            return;
+        }
+        $relative = str_replace('\\', DIRECTORY_SEPARATOR, substr($class, strlen($prefix)));
+        $path = dirname(__DIR__) . '/src/' . $relative . '.php';
+        if (is_file($path)) {
+            require $path;
+        }
+    });
+}
+
+Env::load(base_path('.env'));
+Config::load(require base_path('config/app.php'));
+
+$command = $argv[1] ?? 'help';
+$db = new Database((string) config('database.dsn'), (string) config('database.user'), (string) config('database.password'));
+$users = new UserRepository($db);
+
+if ($command === 'help') {
+    fwrite(STDOUT, "NullAuth recovery CLI\n\n");
+    fwrite(STDOUT, "Commands:\n");
+    fwrite(STDOUT, "  user:create-admin <email> <username> <display-name>\n");
+    fwrite(STDOUT, "  user:unlock <username-or-email>\n");
+    fwrite(STDOUT, "  user:reset-mfa <username-or-email>\n");
+    exit(0);
+}
+
+if ($command === 'user:create-admin') {
+    [$email, $username, $displayName] = [$argv[2] ?? '', $argv[3] ?? '', $argv[4] ?? 'Administrator'];
+    if ($email === '' || $username === '') {
+        fail('email and username are required');
+    }
+    $password = promptHidden('Initial password: ');
+    if (strlen($password) < 14) {
+        fail('password must be at least 14 characters');
+    }
+    $pepper = (string) config('app.pepper', '');
+    $candidate = $pepper === '' ? $password : hash_hmac('sha384', $password, $pepper, true);
+    $hash = password_hash($candidate, PASSWORD_ARGON2ID, config('argon2id'));
+    $id = $users->createAdmin($email, $username, $displayName, $hash);
+    fwrite(STDOUT, "Created administrator {$id}\n");
+    exit(0);
+}
+
+if ($command === 'user:unlock') {
+    $identifier = $argv[2] ?? '';
+    if ($identifier === '') {
+        fail('username or email is required');
+    }
+    $user = $users->findForLogin($identifier);
+    if ($user === null) {
+        fail('user not found');
+    }
+    $stmt = $db->pdo()->prepare('UPDATE users SET locked_until = NULL, is_disabled = false WHERE id = :id');
+    $stmt->execute(['id' => $user['id']]);
+    fwrite(STDOUT, "Unlocked {$user['username']}\n");
+    exit(0);
+}
+
+if ($command === 'user:reset-mfa') {
+    $identifier = $argv[2] ?? '';
+    if ($identifier === '') {
+        fail('username or email is required');
+    }
+    $user = $users->findForLogin($identifier);
+    if ($user === null) {
+        fail('user not found');
+    }
+    $stmt = $db->pdo()->prepare('DELETE FROM mfa_totp WHERE user_id = :id');
+    $stmt->execute(['id' => $user['id']]);
+    $stmt = $db->pdo()->prepare('DELETE FROM mfa_recovery_codes WHERE user_id = :id');
+    $stmt->execute(['id' => $user['id']]);
+    fwrite(STDOUT, "MFA reset for {$user['username']}\n");
+    exit(0);
+}
+
+fail('unknown command');
+
+function fail(string $message): never
+{
+    fwrite(STDERR, "Error: {$message}\n");
+    exit(1);
+}
+
+function promptHidden(string $prompt): string
+{
+    fwrite(STDOUT, $prompt);
+    system('stty -echo');
+    $line = trim((string) fgets(STDIN));
+    system('stty echo');
+    fwrite(STDOUT, "\n");
+    return $line;
+}
+
+
