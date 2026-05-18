@@ -1,0 +1,475 @@
+You are a senior cybersecurity engineer, senior PHP architect, PostgreSQL DBA, and senior full-stack UI/UX engineer.
+
+You are designing and implementing a SELF-HOSTED enterprise-grade password management web application for a professional systems administrator and web developer.
+
+This project must prioritize SECURITY FIRST in every architectural and implementation decision.
+
+The target environment is:
+
+Ubuntu Linux server
+Nginx
+PHP 8.3+
+PostgreSQL 16+
+Bootstrap 5
+jQuery only where Bootstrap alone is insufficient
+NO React
+NO Next.js
+NO Node.js backend
+NO third-party hosted authentication systems
+NO cloud dependencies
+Entirely self-hosted
+
+The final deliverable should resemble a polished commercial-grade password manager similar in professionalism and usability to Passwordstate, but purpose-built for a single organization / private self-hosted environment.
+
+==================================================
+CORE DESIGN PHILOSOPHY
+
+Every aspect of this application must assume hostile internet conditions.
+
+The application must be designed against:
+
+brute force attacks
+credential stuffing
+enumeration attacks
+session hijacking
+CSRF
+XSS
+SQL injection
+timing attacks
+replay attacks
+clickjacking
+privilege escalation
+insecure direct object references
+malicious insiders
+database theft
+browser cache leakage
+clipboard leakage mitigation where possible
+sensitive log exposure
+predictable encryption parameters
+weak random number generation
+PHP misconfiguration
+insecure file permissions
+
+The codebase must follow OWASP best practices everywhere.
+
+Use layered defense.
+
+Never implement “security theater.”
+
+==================================================
+APPLICATION CONCEPT
+
+The application is a stealth-oriented self-hosted password vault.
+
+The public-facing homepage should intentionally appear to be a fake generic HTTP 500 Internal Server Error page.
+
+Requirements:
+
+Return actual HTTP status code 500
+Display realistic nginx-style or generic server error appearance
+Minimal HTML
+No branding
+No visible login form
+
+The REAL login mechanism is hidden.
+
+A secret keyboard shortcut/hotkey combination should reveal the login interface dynamically via JavaScript.
+
+Example concepts:
+
+triple key combination
+timed key sequence
+Konami-style sequence
+configurable server-side hotkey sequence
+
+Design this professionally and securely.
+
+The hidden login mechanism should:
+
+not expose itself in HTML comments
+not expose itself in obvious JS variable names
+not create obvious DOM elements before activation
+resist casual inspection
+
+However:
+
+do NOT rely on obscurity as primary security
+this is only an additional stealth layer
+==================================================
+AUTHENTICATION REQUIREMENTS
+
+Implement enterprise-grade authentication security.
+
+Must include:
+
+Strong password hashing
+Use Argon2id
+Proper memory cost tuning
+Proper iteration tuning
+Proper thread configuration
+Per-user cryptographic salts
+Use cryptographically secure random generation
+Never use predictable salts
+Never use static salts
+Never use application-wide salts alone
+Optional application pepper
+Stored outside database
+Environment variable or secured config
+Multi-factor authentication support
+TOTP compatible
+QR enrollment
+Recovery codes
+Secure session management
+Session regeneration
+Secure cookies
+HttpOnly
+SameSite strict/lax evaluation
+HTTPS-only cookies
+Idle timeout
+Absolute timeout
+Login attempt monitoring
+Log:
+timestamp
+IP
+user agent
+username attempted
+success/failure
+geo lookup optional
+Store in audit tables
+Progressive lockout mechanism
+Exponential backoff preferred
+Temporary lockouts
+IP + account-aware throttling
+Anti-enumeration messaging
+Optional allowlist mode
+IP restrictions
+CIDR support
+Admin lockout recovery approach
+CLI recovery tool
+SQL recovery instructions
+emergency recovery mode
+==================================================
+ENCRYPTION REQUIREMENTS
+
+This section is CRITICAL.
+
+Passwords stored in the vault must be encrypted using MODERN authenticated encryption.
+
+Requirements:
+
+Use libsodium if possible
+Prefer XChaCha20-Poly1305
+AES-256-GCM acceptable fallback
+Each vault item must use:
+unique nonce
+authenticated encryption
+key separation
+integrity protection
+
+The design must explain:
+
+key hierarchy
+master key strategy
+data encryption keys
+key derivation
+user-specific encryption concepts
+whether encryption is zero-knowledge or server-assisted
+tradeoffs involved
+
+Sensitive secrets must NEVER be stored plaintext in:
+
+logs
+sessions
+browser localStorage
+hidden form fields
+URLs
+==================================================
+DATABASE DESIGN
+
+Use PostgreSQL.
+
+Create complete SQL schema with:
+
+users
+roles
+permissions
+vault entries
+categories
+folders
+audit logs
+failed login attempts
+MFA data
+password history
+API tokens (future-ready)
+sharing permissions
+session tracking
+
+Use:
+
+indexes
+foreign keys
+constraints
+UUIDs where appropriate
+soft delete strategy where useful
+
+Explain design decisions.
+
+==================================================
+PASSWORD VAULT FEATURES
+
+Vault entries should support:
+
+title
+username
+password
+URL
+notes
+categories
+tags
+expiration dates
+password history
+custom fields
+attachments (optional secure encrypted storage)
+favorite/starred entries
+
+Password reveal must:
+
+require explicit click
+auto-hide after timeout optional
+support click-to-copy
+support secure clipboard handling where possible
+==================================================
+PASSWORD GENERATOR
+
+Create a PROFESSIONAL-GRADE password generator.
+
+Features:
+
+adjustable length
+uppercase toggle
+lowercase toggle
+numbers toggle
+symbols toggle
+ambiguous character exclusion
+readable passwords
+pronounceable passwords
+passphrase mode
+diceware-style mode
+entropy estimation
+strength meter
+random separator configuration
+reusable generation profiles
+
+Randomness must use:
+
+cryptographically secure randomness only
+
+Explain entropy calculations.
+
+==================================================
+USER MANAGEMENT
+
+Support:
+
+multiple users
+RBAC
+administrators
+vault sharing
+per-folder permissions
+read-only sharing
+auditability
+
+Admins should:
+
+manage users
+reset MFA
+disable accounts
+force password resets
+review audit logs
+==================================================
+UI/UX REQUIREMENTS
+
+Design a MODERN professional interface.
+
+Theme:
+
+blue and white
+clean enterprise appearance
+smooth Bootstrap styling
+collapsible sections
+expandable panels
+mobile responsive
+desktop responsive
+
+Use:
+
+Bootstrap 5
+jQuery sparingly
+
+Provide:
+
+sidebar navigation
+dashboard
+collapsible forms
+modal dialogs
+toast notifications
+dark mode optional
+
+Avoid:
+
+clutter
+flashy animations
+SPA frameworks
+==================================================
+FRONTEND SECURITY
+
+Implement:
+
+strict CSP
+CSRF protection
+output escaping
+secure AJAX patterns
+anti-cache headers for sensitive pages
+frame busting / CSP frame-ancestors
+secure clipboard handling
+
+Explain all frontend security decisions.
+
+==================================================
+NGINX HARDENING
+
+Provide recommended nginx configuration including:
+
+HTTPS enforcement
+TLS hardening
+HTTP security headers
+rate limiting
+request size limits
+PHP handling security
+deny hidden files
+deny sensitive extensions
+HSTS
+OCSP stapling
+secure cipher suites
+access log recommendations
+fail2ban integration ideas
+==================================================
+PHP APPLICATION ARCHITECTURE
+
+Use a professional architecture.
+
+Prefer:
+
+MVC or service-layer structure
+dependency injection where useful
+reusable services
+repositories
+middleware concepts
+environment configuration separation
+
+Include:
+
+composer dependencies
+folder structure
+bootstrap process
+routing approach
+CSRF middleware
+authentication middleware
+==================================================
+AUDITING & LOGGING
+
+Every sensitive action should be auditable.
+
+Audit examples:
+
+login success/failure
+password viewed
+password copied
+password edited
+user created
+MFA disabled
+admin actions
+
+Logs should:
+
+avoid secret exposure
+support filtering
+support export
+support retention policies
+==================================================
+DEPLOYMENT REQUIREMENTS
+
+Provide:
+
+step-by-step deployment instructions
+Ubuntu setup commands
+PHP extensions required
+PostgreSQL setup
+nginx setup
+permissions setup
+systemd service ideas
+backup strategy
+disaster recovery guidance
+==================================================
+DELIVERABLE FORMAT
+
+I want the implementation generated in phases.
+
+PHASE 1:
+
+overall architecture
+threat model
+database schema
+directory structure
+security strategy
+
+PHASE 2:
+
+authentication system
+encryption implementation
+session management
+MFA
+
+PHASE 3:
+
+vault functionality
+password generator
+UI components
+
+PHASE 4:
+
+admin system
+auditing
+sharing
+advanced features
+
+PHASE 5:
+
+nginx hardening
+deployment
+backup/recovery
+production checklist
+==================================================
+IMPORTANT IMPLEMENTATION RULES
+Do NOT oversimplify security
+Do NOT use toy examples
+Do NOT skip validation
+Do NOT use insecure cryptography
+Do NOT invent fake encryption
+Do NOT use MD5/SHA1 for passwords
+Do NOT store plaintext secrets
+Do NOT expose secrets in logs
+Do NOT rely on obscurity
+Do NOT use deprecated PHP features
+
+Whenever possible:
+
+explain WHY decisions are secure
+explain tradeoffs
+explain attack mitigations
+
+Generate production-quality code.
+
+Assume the reader is technically advanced and expects enterprise-grade engineering quality.
+
+The app will be appropriately named, "NullAuth" 
