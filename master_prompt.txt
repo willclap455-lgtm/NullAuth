@@ -1,3 +1,6 @@
+Configure the Cursor Cloud environment for the NullAuth repository. Install PHP 8.3 CLI with pdo_pgsql, mbstring, xml, curl, sodium support, Composer, PostgreSQL 16 client tools, and optionally PostgreSQL 16 server for schema validation. Ensure composer install, composer check, and psql --version work on startup.
+
+
 You are a senior cybersecurity engineer, senior PHP architect, PostgreSQL DBA, and senior full-stack UI/UX engineer.
 
 You are designing and implementing a SELF-HOSTED enterprise-grade password management web application for a professional systems administrator and web developer.
