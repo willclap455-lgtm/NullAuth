@@ -24,6 +24,28 @@ php -r "echo base64_encode(random_bytes(32)), PHP_EOL;"
 php -S 127.0.0.1:8080 -t public
 ```
 
+## Development/test environment
+
+Ubuntu development and Cursor Cloud environments need PHP CLI, Composer, and the PostgreSQL client before running checks:
+
+```bash
+bash deploy/cloud-agent/setup-nullauth-tools.sh
+composer install --no-interaction
+composer check
+psql --version
+```
+
+The setup script installs `php-cli`, `php-pgsql`, `php-mbstring`, `php-xml`, `php-curl`, `composer`, and `postgresql-client`. The sodium extension is provided by Ubuntu's PHP 8.3 package set and is verified by the script.
+
+To validate the schema against a local PostgreSQL 16 server in a disposable development environment:
+
+```bash
+bash deploy/cloud-agent/setup-nullauth-tools.sh --with-postgres-server
+sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE ROLE nullauth_app_test LOGIN PASSWORD 'test-password';"
+sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE nullauth_test OWNER nullauth_app_test;"
+PGPASSWORD='test-password' psql -h 127.0.0.1 -U nullauth_app_test -d nullauth_test -v ON_ERROR_STOP=1 -f database/schema.sql
+```
+
 Apply `database/schema.sql` to PostgreSQL before using authenticated workflows:
 
 ```bash
